@@ -6,7 +6,7 @@ Entry point: `index.html`. Nessuna build. Percorsi relativi: funziona su GitHub 
 3. Il sito sarà su `https://<utente>.github.io/<repo>/`.
 ## Foto (da fare)
 Il download delle foto originali non è stato possibile nell'ambiente di sviluppo. Il sito le carica dall'URL originale come ripiego.
-Per renderlo indipendente: scarica le 14 foto della galleria di pulimetalsrl.it/gallery e salvale in `assets/img/<hash>.jpg` (hash = elenco PHOTOS in `assets/app.js`; il file locale ha la precedenza).
+Per renderlo indipendente: scarica le 14 foto della galleria di pulimetalsrl.it/gallery e salvale in `<hash>.jpg (nella stessa cartella)` (hash = elenco PHOTOS in `assets/app.js`; il file locale ha la precedenza).
 Le immagini "gemini_generated_*" del sito attuale sono generate con IA e NON sono state usate.
 ## Da fare prima del lancio
 - Sostituire i canonical/sitemap se il dominio cambia; aggiungere redirect lato hosting (GitHub Pages non li gestisce).
