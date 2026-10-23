@@ -1,20 +1,46 @@
 (()=>{"use strict";
-const B="https://files.supersite.aruba.it/media/22288_",LOCAL="";
-// Fonte dati unica per le foto della galleria (hash = file originali sul sito attuale).
-const PHOTOS=["cf6d49b99fc28765c74f907da43870f1a3aba86e","f7ac95bf76c67369099a0bae1ac323c821669813","50f67159fca249c4de4b2ca86f4a366a9f4ee39b","6ffa86b64ec91834ad65c0d17dca82fbbc7d3102","83e9a06c9c570b5b75c6aed25b911eccaeb98b2c","8e2b722178ab851efea8ea8dde8a70cf6e33e58e","0280f70a91276b8a97f5d53699d3ce938fbc36b9","bd149a32aa674310bfd39754521e03364182f03f","110c36608a7d62e2be66a98ce0d326ac1beb3033","bee71759a7789b9bcf55560fc4b172ee28e86da3","fa57415b77775af06a030f63e2b4da703e8f582a","ef7e7e3075fdf9b80f605476314d61c0c8e3f117","3572e3813fcbd145636f44e467414acb58da0b6b","54502cbde0f45415941d12f346a70bb5ca7bdedd"];
-// Prima prova il file locale (assets/img/<hash>.jpg); se manca, usa l'originale remoto.
-const src=(h,w)=>({local:LOCAL+h+".jpg",remote:`${B}${h}.jpeg/v1/w_${w},h_0/foto.jpeg`});
-const fall=(img,h,w)=>{const s=src(h,w);img.src=s.local;img.onerror=()=>{img.onerror=null;img.src=s.remote}};
+/* ===== CONFIGURAZIONE (un solo punto da modificare) ===== */
+const CONFIG={
+  // Servizio che invia la richiesta da un indirizzo "noreply" alla casella dello staff.
+  // Al primo invio FormSubmit manda una mail di attivazione alla casella indicata: va confermata.
+  formEndpoint:"https://formsubmit.co/ajax/info@pulimetalsrl.it",
+  fallbackMail:"info@pulimetalsrl.it"
+};
+/* Recensioni: inserire SOLO recensioni reali. Se l'elenco è vuoto la sezione resta nascosta.
+   Esempio: {nome:"Mario Rossi, Azienda Srl", testo:"...", stelle:5, fonte:"Google"} */
+const REVIEWS=[];
+/* Domande "per curiosità": risposte basate solo su informazioni presenti sul sito di Pulimetal. */
+const FAQ=[
+ ["Quali lavorazioni eseguite?","Nastratura, levigatura, spazzolatura, satinatura e lucidatura di superfici metalliche. Ogni lavorazione viene scelta in base al materiale, allo stato iniziale del pezzo e al risultato richiesto."],
+ ["Quali materiali lavorate?","Principalmente ferro, alluminio, acciaio inox e ottone."],
+ ["Che differenza c’è tra spazzolatura e satinatura?","La spazzolatura crea una trama più evidente e definita; la satinatura una superficie più fine, uniforme e discreta. La scelta segue le esigenze del cliente."],
+ ["Per chi lavorate?","Per aziende e artigiani, in conto terzi: dalla singola lavorazione alla fornitura continuativa."],
+ ["Dove siete e quali sono gli orari?","Via Filippo Meda 16, 20037 Paderno Dugnano (Milano). Siamo aperti dal lunedì al venerdì, 8:00–12:00 e 13:00–17:00."],
+ ["Come richiedo un preventivo?","Compila il modulo nella sezione Contatti indicando materiale, quantità e finitura, oppure scrivi a info@pulimetalsrl.it o chiama il 02 2809 5247."]
+];
+const PHOTOS=[1,2,3,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40].map(n=>"p"+String(n).padStart(2,"0")+".jpg");
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 
-const hi=$(".hero-img");if(hi){const s=src(hi.dataset.img,1600),t=new Image();t.onload=()=>hi.style.backgroundImage=`url(${t.src})`;t.onerror=()=>{t.onerror=null;t.src=s.remote};t.src=s.local}
+/* Galleria + lightbox con frecce */
+const g=$("#grid"),lb=$("#lb"),lbi=lb.querySelector("img");let cur=0;
+PHOTOS.forEach((f,i)=>{const b=document.createElement("button"),im=new Image();b.type="button";b.setAttribute("aria-label","Ingrandisci foto "+(i+1)+" di "+PHOTOS.length);
+ im.src=f;im.alt="Pezzo metallico lavorato Pulimetal, foto "+(i+1);im.loading="lazy";im.decoding="async";b.append(im);b.onclick=()=>show(i,true);g.append(b)});
+function show(i,open){cur=(i+PHOTOS.length)%PHOTOS.length;lbi.src=PHOTOS[cur];lbi.alt="Pezzo metallico lavorato Pulimetal, foto "+(cur+1);if(open)lb.showModal()}
+lb.addEventListener("click",e=>{if(e.target===lb||e.target.classList.contains("x"))lb.close();if(e.target.classList.contains("pv"))show(cur-1);if(e.target.classList.contains("nx"))show(cur+1)});
+lb.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")show(cur-1);if(e.key==="ArrowRight")show(cur+1)});
 
-const g=$("#grid"),lb=$("#lb"),lbi=lb.querySelector("img");
-PHOTOS.forEach((h,i)=>{const b=document.createElement("button"),im=new Image();b.type="button";b.setAttribute("aria-label","Ingrandisci foto "+(i+1)+" di "+PHOTOS.length);b.dataset.r="";
- im.alt="Lavorazione su metallo, foto "+(i+1);im.loading="lazy";im.width=300;im.height=i%3?260:360;fall(im,h,700);b.append(im);
- b.onclick=()=>{lbi.alt=im.alt;fall(lbi,h,1400);lb.showModal()};g.append(b)});
-lb.addEventListener("click",e=>{if(e.target===lb||e.target.classList.contains("x"))lb.close()});
+/* Recensioni (solo se presenti) */
+if(REVIEWS.length){$("#recensioni").hidden=false;$("#navrev").hidden=false;
+ REVIEWS.forEach(r=>{const c=document.createElement("article");c.className="card";const n=Math.max(1,Math.min(5,r.stelle||5));
+  const s=document.createElement("div");s.className="stars";s.setAttribute("role","img");s.setAttribute("aria-label",n+" stelle su 5");s.textContent="★".repeat(n)+"☆".repeat(5-n);
+  const p=document.createElement("p");p.textContent=r.testo;const sm=document.createElement("small");sm.textContent=r.nome+(r.fonte?" · "+r.fonte:"");c.append(s,p,sm);$("#cards").append(c)})}
 
+/* Domande */
+const qs=$("#qs"),ans=$("#ans");
+FAQ.forEach(([q,a])=>{const b=document.createElement("button");b.type="button";b.textContent=q;b.setAttribute("aria-pressed","false");
+ b.onclick=()=>{$$("#qs button").forEach(x=>x.setAttribute("aria-pressed",x===b));ans.textContent=a};qs.append(b)});
+
+/* Menu + header */
 const burger=$(".burger"),nav=$("#nav"),top=$(".top");
 const tog=o=>{nav.classList.toggle("open",o);burger.setAttribute("aria-expanded",o);burger.setAttribute("aria-label",o?"Chiudi il menu":"Apri il menu")};
 burger.onclick=()=>tog(!nav.classList.contains("open"));
@@ -22,16 +48,22 @@ nav.addEventListener("click",e=>{if(e.target.tagName==="A")tog(false)});
 addEventListener("keydown",e=>{if(e.key==="Escape"&&nav.classList.contains("open")){tog(false);burger.focus()}});
 addEventListener("scroll",()=>top.classList.toggle("on",scrollY>40),{passive:true});
 
+/* Scrollytelling lavorazioni */
 if("IntersectionObserver"in window){
  const names=["Nastratura","Levigatura","Spazzolatura & satinatura","Lucidatura"],surf=$("#surface");
  const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const n=+e.target.dataset.step;$$(".step").forEach(s=>s.classList.toggle("on",s===e.target));surf.dataset.step=n;$("#capn").textContent="0"+(n+1);$("#capt").textContent=names[n]}}),{rootMargin:"-45% 0px -45% 0px"});
  $$(".step").forEach(s=>so.observe(s));
- const r=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");r.unobserve(e.target)}}),{threshold:.1});$$("[data-r]").forEach(x=>r.observe(x));
-}else{$$("[data-r]").forEach(x=>x.classList.add("in"));$$(".step").forEach(s=>s.classList.add("on"))}
+}else $$(".step").forEach(s=>s.classList.add("on"));
 
-$("#f").addEventListener("submit",e=>{e.preventDefault();const f=e.target,m=$("#msg");let ok=true;
- [...f.elements].forEach(x=>{if(x.name){const bad=!x.value.trim();x.setAttribute("aria-invalid",bad);if(bad)ok=false}});
- if(!ok){m.textContent="Compila tutti i campi.";return}
- m.textContent="Apro il tuo programma di posta…";
- location.href="mailto:info@pulimetalsrl.it?subject="+encodeURIComponent("Richiesta di informazioni dal sito")+"&body="+encodeURIComponent(`Nome/azienda: ${f.n.value}\nContatto: ${f.c.value}\n\n${f.m.value}`)});
+/* Modulo preventivo: conferma solo dopo invio riuscito */
+$("#f").addEventListener("submit",async e=>{e.preventDefault();const f=e.target,m=$("#msg"),btn=f.querySelector("button");m.className="msg";let ok=true;
+ f.querySelectorAll("[required]").forEach(x=>{const bad=x.type==="checkbox"?!x.checked:!x.value.trim()||(x.type==="email"&&!/^\S+@\S+\.\S+$/.test(x.value));x.setAttribute("aria-invalid",bad);if(bad)ok=false});
+ if(!ok){m.textContent="Controlla i campi evidenziati.";m.classList.add("err");return}
+ const d=new FormData(f);d.delete("privacy");d.append("_subject","Richiesta di preventivo dal sito Pulimetal");d.append("_template","table");d.append("_captcha","false");
+ btn.disabled=true;m.textContent="Invio in corso…";
+ try{const r=await fetch(CONFIG.formEndpoint,{method:"POST",body:d,headers:{Accept:"application/json"}});const j=await r.json().catch(()=>({}));
+  if(r.ok&&(j.success===true||j.success==="true")){f.reset();m.textContent="Richiesta inviata. Lo staff di Pulimetal ti risponderà appena possibile."}
+  else throw new Error("send")}
+ catch(_){m.classList.add("err");m.innerHTML="Invio non riuscito. Scrivici a <a href=\"mailto:"+CONFIG.fallbackMail+"\">"+CONFIG.fallbackMail+"</a> o chiama il 02 2809 5247."}
+ finally{btn.disabled=false}});
 })();

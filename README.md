@@ -1,14 +1,10 @@
-# Pulimetal – sito statico
-Entry point: `index.html`. Nessuna build. Percorsi relativi: funziona su GitHub Pages anche con prefisso repo.
-## Pubblicazione
-1. Crea un repository su GitHub e carica TUTTO il contenuto di questa cartella (incluso `.nojekyll`).
-2. Settings → Pages → Source: "Deploy from a branch" → `main` / root → Save.
-3. Il sito sarà su `https://<utente>.github.io/<repo>/`.
-## Foto (da fare)
-Il download delle foto originali non è stato possibile nell'ambiente di sviluppo. Il sito le carica dall'URL originale come ripiego.
-Per renderlo indipendente: scarica le 14 foto della galleria di pulimetalsrl.it/gallery e salvale in `<hash>.jpg (nella stessa cartella)` (hash = elenco PHOTOS in `assets/app.js`; il file locale ha la precedenza).
-Le immagini "gemini_generated_*" del sito attuale sono generate con IA e NON sono state usate.
-## Da fare prima del lancio
-- Sostituire i canonical/sitemap se il dominio cambia; aggiungere redirect lato hosting (GitHub Pages non li gestisce).
-- Pagina privacy: resta il link a pulimetalsrl.it/privacy (testo legale da validare).
-- Form: apre `mailto:`; per un invio reale serve un servizio esterno.
+# Pulimetal – sito statico (versione senza cartelle)
+Tutti i file stanno nella stessa cartella: carica TUTTO su GitHub (Add file → Upload files, max 100 file per volta; qui sono circa 55).
+Pubblicazione: Settings → Pages → Deploy from a branch → main / root.
+
+## Da configurare / confermare
+- Modulo preventivo: in `app.js` (CONFIG) l'endpoint usa FormSubmit verso info@pulimetalsrl.it. Al PRIMO invio arriva una mail di attivazione a quella casella: va confermata, poi le richieste arrivano da un mittente noreply. Se lo staff usa un'altra casella, cambia l'indirizzo in CONFIG.
+- Recensioni: `REVIEWS` in `app.js` è vuoto, quindi la sezione è nascosta. Inserire solo recensioni reali (nome, testo, stelle, fonte).
+- Footer: copiato dal sito attuale, tranne il capitale sociale ("€10.00,00" è scritto in modo errato sul sito): da confermare col cliente. I link social del sito attuale non hanno un indirizzo riconoscibile e non sono stati inclusi.
+- Font: Space Grotesk e DM Sans da Google Fonts (richiesta a terze parti: valutare menzione nella privacy o font locali).
+- Rimossi i dati non verificati presenti nei siti di esempio (anni di esperienza, progetti completati, clienti, "dal 2017").
